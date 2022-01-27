@@ -22,7 +22,7 @@ if __name__ == '__main__':
             bam_files.append(bam_file)
 
     bam_files_str = ' '.join(bam_files)
-    ncpus = range(1, 11)
+    ncpus = range(1, 9)
 
     htseq_command = """
         python -m HTSeq.scripts.count \
@@ -45,25 +45,31 @@ if __name__ == '__main__':
 
         print(ncpu)
 
-        outfile = '{dirname}/200_cells/out/ncpu_{ncpu}.h5ad'.format(dirname=dirname, ncpu=ncpu)
-        run_htseq_command = htseq_command.format(bamfiles=bam_files_str, gtffile=gtf_file, ncpu=ncpu, outfile=outfile)
+        time_10_runs = []
+        for x in range(5):
 
-        # time_10_runs = []
-        # for x in range(5):
-        #     t_start = time.time()
-        #     run_htseq(run_htseq_command)
-        #     t_end = time.time()
-        #     t_delta = t_end - t_start
-        #     time_10_runs.append(t_delta)
+            outfile = '{dirname}/200_cells/out/ncpu_{ncpu}_iter_{iter}_time.h5ad'.format(dirname=dirname, ncpu=ncpu, iter=x)
+            run_htseq_command = htseq_command.format(bamfiles=bam_files_str, gtffile=gtf_file, ncpu=ncpu, outfile=outfile)
 
-        # stats_df = pd.DataFrame({"Duration": time_10_runs})
-        # stats_df["iteration"] = stats_df.index
-        # stats_df["unit"] = "seconds"
-        # stats_df.to_csv("{dirname}/200_cells/benchmark_time_ncpu_{ncpu}.csv".format(dirname=dirname, ncpu=ncpu), index=False)
+            t_start = time.time()
+            run_htseq(run_htseq_command)
+            t_end = time.time()
+            t_delta = t_end - t_start
+            time_10_runs.append(t_delta)
+
+            print(t_delta)
+
+        stats_df = pd.DataFrame({"Duration": time_10_runs})
+        stats_df["iteration"] = stats_df.index
+        stats_df["unit"] = "seconds"
+        stats_df.to_csv("{dirname}/200_cells/benchmark_time_ncpu_{ncpu}.csv".format(dirname=dirname, ncpu=ncpu), index=False)
 
         mem_usages = {}
         for x in range(5):
-            print(x)
+
+            outfile = '{dirname}/200_cells/out/ncpu_{ncpu}_iter_{iter}_ram.h5ad'.format(dirname=dirname, ncpu=ncpu, iter=x)
+            run_htseq_command = htseq_command.format(bamfiles=bam_files_str, gtffile=gtf_file, ncpu=ncpu, outfile=outfile)
+
             mem_usage = memory_usage((run_htseq, (run_htseq_command,)),
                 include_children=True, multiprocess=True, max_iterations=1, interval=10)
             mem_usages['iteration_{x}'.format(x=x)] = mem_usage
