@@ -1,11 +1,10 @@
 #!/bin/bash
 
+# Run STAR to align 200 cells from Domingo-Gonzalez et al. 2020
 dirname=/home/gputri/HTSeq
 genomedir=$dirname/star_files/genome
 readfilesdir=$dirname/parallel_vs_serial/raw_files
 outdir=$dirname/parallel_vs_serial/star_out/
-
-# NOTE, the STAR parameters are predominantly based on the script in the paper.
 
 while IFS= read -r line; do
     outdir=$dirname/parallel_vs_serial/star_out/$line/
@@ -33,6 +32,4 @@ while IFS= read -r line; do
         --outFilterMatchNminOverLread 0.4 \
         --outFilterScoreMinOverLread 0.4 \
         --outReadsUnmapped Fastx
-        # DOES NOT WORK
-        #--clip3pAdapterSeq CTGTCTCTTATACACATCT \
 done < $1
